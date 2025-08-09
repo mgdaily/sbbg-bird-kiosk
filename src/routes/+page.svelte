@@ -19,7 +19,7 @@
   let isMicEnabled = false;
   let isPlaying = false;
 
-  const BIRD_AUDIO_URL = '/audio/bird.mp3'; // place your file at static/audio/bird.mp3
+  const BIRD_AUDIO_URL = '/audio/wrentit.mp3'; // place your file at static/audio/bird.mp3
 
   function ensureAudioContext(): AudioContext {
     if (!audioContext) {
@@ -69,7 +69,7 @@
       };
     } catch (err) {
       console.error(err);
-      alert('Could not play bird audio. Ensure /static/audio/bird.mp3 exists.');
+      alert(`Could not play bird audio. Ensure ${BIRD_AUDIO_URL} exists.`);
     }
   }
 

@@ -1,10 +1,12 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
 
-  let { analyser }: { analyser: AnalyserNode | null } = $props();
-  let { label = '' }: { label?: string } = $props();
-  let { lineColor = '#17a2b8' }: { lineColor?: string } = $props();
-  let { bgColor = '#0b1720' }: { bgColor?: string } = $props();
+  const { analyser, label = '', lineColor = '#17a2b8', bgColor = '#0b1720' }: {
+    analyser: AnalyserNode | null;
+    label?: string;
+    lineColor?: string;
+    bgColor?: string;
+  } = $props();
 
   let canvas: HTMLCanvasElement | null = null;
   let animationFrameId: number | null = null;

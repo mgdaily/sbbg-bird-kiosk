@@ -1,8 +1,10 @@
 <script lang="ts">
-  let { label }: { label: string } = $props();
-  let { onPress }: { onPress: () => void } = $props();
-  let { emoji = '🐦' }: { emoji?: string } = $props();
-  let { color = '#22c55e' }: { color?: string } = $props();
+  const { label, onPress, emoji = '🐦', color = '#22c55e' }: {
+    label: string;
+    onPress: () => void;
+    emoji?: string;
+    color?: string;
+  } = $props();
 </script>
 
 <style>
