@@ -1,5 +1,6 @@
 <script lang="ts">
   import WaveformCanvas from '$lib/components/WaveformCanvas.svelte';
+  import BigButton from '$lib/components/BigButton.svelte';
   import { onMount, onDestroy } from 'svelte';
 
   let audioContext: AudioContext | null = null;
@@ -159,6 +160,11 @@
     width: 100%;
     margin: 0 auto;
   }
+  .hero {
+    display: grid;
+    place-items: center;
+    padding: 24px 0;
+  }
   .controls {
     display: grid;
     gap: 12px;
@@ -208,10 +214,10 @@
     <div class="hint">Tap Play, then mimic into the mic</div>
   </header>
   <main>
+    <div class="hero">
+      <BigButton label={isPlaying ? 'Playing…' : 'Play Bird Call'} emoji="🐦🔊" color="#22c55e" onPress={playBird} />
+    </div>
     <div class="controls">
-      <button class="button" on:click={playBird} aria-pressed={isPlaying} aria-label="Play bird call">
-        ▶︎ Play Bird Call
-      </button>
       {#if !isMicEnabled}
         <button class="button secondary" on:click={enableMic} aria-label="Enable microphone">🎤 Enable Mic</button>
       {:else}
