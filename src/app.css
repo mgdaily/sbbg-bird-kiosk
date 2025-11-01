@@ -1,2 +1,50 @@
 @import "tailwindcss";
 @plugin "daisyui";
+
+/* Font Face Declarations */
+/* If using Adobe Fonts, add the Adobe Fonts link in +layout.svelte instead */
+/* If self-hosting, place font files in static/fonts/ and uncomment/modify the @font-face rules below */
+
+
+@font-face {
+  font-family: 'Larken';
+  src: url('/fonts/larken-regular.otf') format('otf');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Favorit';
+  src: url('/fonts/favorit-regular.woff2') format('woff2'),
+       url('/fonts/favorit-regular.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+
+:root {
+  --forest-green: #254e3d;
+  --white: #f0f0f0;
+  --light-gray: #D3D3D3;
+}
+
+body {
+  background-color: var(--forest-green);
+  color: var(--white);
+  font-family: 'Favorit', sans-serif;
+  min-height: 100vh;
+}
+
+/* Headlines and expressive type use Larken */
+h1, h2, h3, h4, h5, h6,
+.headline,
+.serif-title {
+  font-family: 'Larken', serif;
+}
+
+/* Body copy uses Favorit */
+.body-text,
+.sans-serif,
+p, span, div, button, a {
+  font-family: 'Favorit', sans-serif;
+}
