@@ -11,8 +11,6 @@
     let audioChunks: Blob[] = [];
     let stream: MediaStream | null = null;
     let audioContext: AudioContext | null = null;
-    let analyser: AnalyserNode | null = null;
-    let animationFrameId: number | null = null;
     
     let phase = $state<'idle' | 'playing' | 'countdown' | 'recording' | 'recorded'>('idle');
     let countdown = $state<number>(0);
@@ -23,13 +21,12 @@
 
     onMount(async () => {
         const WaveSurfer = (await import('wavesurfer')).default;
-        
         // Create waveform for original call
         originalWaveform = WaveSurfer.create({
             container: '#original-canvas',
             waveColor: '#f0f0f0',
             progressColor: '#ffffff',
-        url: audioPath
+            url: audioPath
         });
         
         originalWaveform.load(audioPath);
@@ -65,11 +62,8 @@
                 // Ignore errors
             }
         }
-        if (animationFrameId !== null) {
-            cancelAnimationFrame(animationFrameId);
-        }
         if (audioContext) {
-            audioContext.close();
+            (audioContext as AudioContext).close();
         }
         if (stream) {
             stream.getTracks().forEach(track => track.stop());
@@ -122,46 +116,17 @@
                 throw new Error('No audio input device found. Please connect a microphone.');
             }
             
-            // Create recording waveform first (empty, we'll use microphone plugin or Web Audio API)
+            // Create recording waveform with live stream BEFORE starting MediaRecorder
             const WaveSurfer = (await import('wavesurfer')).default;
             recordingWaveform = WaveSurfer.create({
                 container: '#recording-canvas',
                 waveColor: '#4ade80',
-                progressColor: '#22c55e'
+                progressColor: '#22c55e',
+                media: stream  // This enables live visualization
             });
             
-            // Try using Microphone plugin for live visualization
-            let useMicrophonePlugin = false;
-            if (WaveSurfer.Microphone && WaveSurfer.registerPlugin) {
-                try {
-                    microphonePlugin = WaveSurfer.registerPlugin(WaveSurfer.Microphone.create());
-                    useMicrophonePlugin = true;
-                    
-                    // Start microphone plugin for live visualization
-                    await microphonePlugin.start();
-                    
-                    // The plugin should automatically visualize on the waveform
-                    console.log('Using WaveSurfer Microphone plugin for live visualization');
-                } catch (pluginError) {
-                    console.warn('Microphone plugin failed, using Web Audio API fallback:', pluginError);
-                    useMicrophonePlugin = false;
-                }
-            }
-            
-            // If microphone plugin isn't available, use Web Audio API for visualization
-            if (!useMicrophonePlugin) {
-                audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-                analyser = audioContext.createAnalyser();
-                analyser.fftSize = 2048;
-                
-                const source = audioContext.createMediaStreamSource(stream);
-                source.connect(analyser);
-                
-                // Start visualization loop
-                visualizeRecording();
-            }
-            
-            // Create MediaRecorder for actual recording
+            // Create MediaRecorder
+            // Firefox prefers certain MIME types - try webm first, fallback to default
             const mimeTypes = ['audio/webm', 'audio/webm;codecs=opus', 'audio/ogg;codecs=opus'];
             let mimeType = '';
             
@@ -188,29 +153,6 @@
             };
             
             mediaRecorder.onstop = async () => {
-                // Stop visualization
-                if (animationFrameId !== null) {
-                    cancelAnimationFrame(animationFrameId);
-                    animationFrameId = null;
-                }
-                
-                // Remove overlay canvas
-                const container = document.querySelector('#recording-canvas') as HTMLElement;
-                if (container) {
-                    const overlay = container.querySelector('canvas.recording-overlay');
-                    if (overlay) {
-                        overlay.remove();
-                    }
-                }
-                
-                if (microphonePlugin) {
-                    try {
-                        microphonePlugin.stop();
-                    } catch (e) {
-                        // Ignore
-                    }
-                }
-                
                 if (audioChunks.length === 0) {
                     errorMessage = 'No audio was recorded. Please try again.';
                     phase = 'idle';
@@ -227,10 +169,11 @@
                 const audioBlob = new Blob(audioChunks, { type: mimeType || 'audio/webm' });
                 const blobUrl = URL.createObjectURL(audioBlob);
                 
-                // Replace the live visualization with the recorded audio for playback
+                // Replace the live stream with the recorded blob for playback
                 if (recordingWaveform) {
                     recordingWaveform.load(blobUrl);
                     
+                    // Clean up blob URL after loading
                     recordingWaveform.on('ready', () => {
                         URL.revokeObjectURL(blobUrl);
                     });
@@ -242,11 +185,6 @@
                 if (stream) {
                     stream.getTracks().forEach(track => track.stop());
                     stream = null;
-                }
-                
-                if (audioContext) {
-                    await audioContext.close();
-                    audioContext = null;
                 }
             };
             
@@ -287,92 +225,7 @@
                 recordingWaveform.destroy();
                 recordingWaveform = null;
             }
-            if (audioContext) {
-                await audioContext.close();
-                audioContext = null;
-            }
         }
-    }
-
-    function visualizeRecording() {
-        if (!analyser || !recordingWaveform) return;
-        
-        const bufferLength = analyser.frequencyBinCount;
-        const dataArray = new Uint8Array(bufferLength);
-        
-        function draw() {
-            if (phase !== 'recording' || !analyser) {
-                return;
-            }
-            
-            analyser.getByteTimeDomainData(dataArray);
-            
-            // Draw on the recording canvas container
-            const container = document.querySelector('#recording-canvas') as HTMLElement;
-            if (!container) {
-                animationFrameId = requestAnimationFrame(draw);
-                return;
-            }
-            
-            // Create or get canvas for visualization overlay
-            let canvas = container.querySelector('canvas.recording-overlay') as HTMLCanvasElement;
-            if (!canvas) {
-                canvas = document.createElement('canvas');
-                canvas.className = 'recording-overlay';
-                canvas.style.position = 'absolute';
-                canvas.style.top = '0';
-                canvas.style.left = '0';
-                canvas.style.width = '100%';
-                canvas.style.height = '100%';
-                canvas.style.pointerEvents = 'none';
-                container.style.position = 'relative';
-                container.appendChild(canvas);
-            }
-            
-            // Set canvas size
-            const rect = container.getBoundingClientRect();
-            if (canvas.width !== rect.width) {
-                canvas.width = rect.width;
-            }
-            if (canvas.height !== rect.height) {
-                canvas.height = rect.height;
-            }
-            
-            const ctx = canvas.getContext('2d');
-            if (ctx) {
-                // Clear previous frame with slight fade for trailing effect
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                // Draw waveform
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = '#4ade80';
-                ctx.beginPath();
-                
-                const sliceWidth = canvas.width / bufferLength;
-                let x = 0;
-                const centerY = canvas.height / 2;
-                
-                for (let i = 0; i < bufferLength; i++) {
-                    const v = (dataArray[i] / 128.0) - 1.0; // Normalize to -1 to 1
-                    const y = centerY + (v * centerY * 0.8); // Scale to 80% of height
-                    
-                    if (i === 0) {
-                        ctx.moveTo(x, y);
-                    } else {
-                        ctx.lineTo(x, y);
-                    }
-                    
-                    x += sliceWidth;
-                }
-                
-                ctx.stroke();
-            }
-            
-            animationFrameId = requestAnimationFrame(draw);
-        }
-        
-        draw();
     }
 
     function playOriginal() {
@@ -386,17 +239,6 @@
         if (recordingTimeout) {
             clearTimeout(recordingTimeout);
             recordingTimeout = null;
-        }
-        if (animationFrameId !== null) {
-            cancelAnimationFrame(animationFrameId);
-            animationFrameId = null;
-        }
-        if (microphonePlugin) {
-            try {
-                microphonePlugin.stop();
-            } catch (e) {
-                // Ignore errors
-            }
         }
         if (mediaRecorder && mediaRecorder.state !== 'inactive') {
             mediaRecorder.stop();
@@ -443,13 +285,14 @@
     <div class="space-y-8">
         <!-- Original Call Section -->
         <div class="space-y-4">
-            <h2 class="headline text-2xl">Original Call</h2>
+            <h2 class="headline text-2xl">Original</h2>
             <div id="original-canvas" class="w-full h-32 bg-black/20 rounded"></div>
             <button 
                 onclick={playOriginal}
+                disabled={phase === 'recording' || phase === 'countdown'}
                 class="px-6 py-2 bg-white/20 hover:bg-white/30 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-                Play Call
+                Play
             </button>
         </div>
 

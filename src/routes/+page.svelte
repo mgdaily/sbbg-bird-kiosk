@@ -1,16 +1,11 @@
-<script lang="ts">
-	import { goto } from '$app/navigation';
+<script lang="ts">	
+  import { goto } from '$app/navigation';
+    import { setSelectedBird } from '$lib/stores/appStore.svelte';
+    import { config } from '$lib/config';
 	
-	const birds = [
-		{ name: 'Common Yellowthroat', path: '/common-yellowthroat' },
-		{ name: 'Loggerhead Shrike', path: '/loggerhead-shrike' },
-		{ name: 'Lesser Goldfinch', path: '/lesser-goldfinch' },
-		{ name: "Allen's Hummingbird", path: '/allens-hummingbird' },
-		{ name: 'California Towhee', path: '/california-towhee' }
-	];
-	
-	function handleBirdClick(path: string) {
-		goto(path);
+	function handleBirdClick(key: string) {
+        setSelectedBird(key);
+        goto('/mimic');
 	}
 </script>
 
@@ -40,24 +35,22 @@
 		
 		<!-- Bird Selection -->
 		<div class="flex flex-wrap justify-center gap-8 mb-16">
-			{#each birds as bird}
+			{#each Object.keys(config.birds) as key}
 				<button 
-					onclick={() => handleBirdClick(bird.path)}
+					onclick={() => handleBirdClick(key)}
 					class="flex flex-col items-center group cursor-pointer transition-transform hover:scale-105"
 				>
-					<div class="w-32 h-32 md:w-40 md:h-40 rounded-full bg-white/10 border-2 border-white/30 mb-4 flex items-center justify-center overflow-hidden group-hover:border-white/60 transition-colors">
-						<!-- Placeholder for bird image - replace with actual images -->
-						<div class="text-white/50 text-4xl">🐦</div>
+					<div class="w-32 h-32 md:w-40 md:h-40 rounded-full bg-white/10 border-2 border-white/30 mb-4 overflow-hidden group-hover:border-white/60 transition-colors relative">
+						<img 
+							src={config.birds[key].imagePath} 
+							alt={config.birds[key].name} 
+							class="w-full h-full object-cover object-center rounded-full"
+						/>
 					</div>
-					<span class="text-white sans-serif text-sm md:text-base text-center">{bird.name}</span>
+					<span class="text-white sans-serif text-sm md:text-base text-center">{config.birds[key].name}</span>
 				</button>
-			{/each}
+			{/each}	
 		</div>
-		
-		<!-- Call to Action -->
-		<p class="text-white sans-serif text-lg text-center mb-4">
-			Click a Bird to Begin.
-		</p>
 	</main>
 
 	<!-- Footer Line -->
