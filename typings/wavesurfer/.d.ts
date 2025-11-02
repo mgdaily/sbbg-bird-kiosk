@@ -1,1 +1,1 @@
-declare module 'wavesurfer';
+declare module "wavesurfer";
