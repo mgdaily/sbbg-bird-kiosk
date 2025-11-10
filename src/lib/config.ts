@@ -3,6 +3,8 @@ export interface BirdMetadata {
   imagePath: string;
   songPath: string;
   callPath: string;
+  callText?: string;
+  songText?: string;
 }
 
 export interface BirdConfig {
@@ -12,35 +14,37 @@ export interface BirdConfig {
 export const config = {
   // Mapping of bird state names to song file names
   birds: {
+    "white-crowned-sparrow": {
+      name: "White-Crowned Sparrow",
+      imagePath: "/images/WCSP_CROPPED.jpg",
+      songPath: "/audio/WCSP_Song_ELINGS-CTRL_20250316_105000_3.mp3",
+      callPath: "/audio/WCSP_Call_ELINGS-CTRL_20250316_105000(shortened).mp3",
+    },
     "common-yellowthroat": {
       name: "Common Yellowthroat",
-      imagePath: "/images/common-yellowthroat.jpg",
-      songPath: "/audio/songs/common-yellowthroat-song.mp3",
-      callPath: "/audio/calls/common-yellowthroat-call.mp3",
-    },
-    "loggerhead-shrike": {
-      name: "Loggerhead Shrike",
-      imagePath: "/images/loggerhead-shrike.jpg",
-      songPath: "/audio/songs/loggerhead-shrike-song.mp3",
-      callPath: "/audio/calls/loggerhead-shrike-call.mp3",
+      imagePath: "/images/COYE_CROPPED.jpg",
+      songPath: "/audio/COYE_Song_ELINGS-CTRL_20250409_060000.mp3",
+      callPath: "/audio/COYE_Call_ELINGS-CTRL_20250409_060000_denoised.mp3",
     },
     "lesser-goldfinch": {
       name: "Lesser Goldfinch",
-      imagePath: "/images/lesser-goldfinch.jpg",
-      songPath: "/audio/songs/lesser-goldfinch-song.mp3",
-      callPath: "/audio/calls/lesser-goldfinch-call.mp3",
+      imagePath: "/images/LEGO_CROPPED.jpg",
+      songPath: "/audio/LEGO_Song_ELINGS_202402_085200.mp3(Shortened).mp3",
+      callPath: "/audio/LEGO_Call_ELINGS_202402_085200(Shortened).mp3",
     },
-    "allens-hummingbird": {
-      name: "Allen's Hummingbird",
-      imagePath: "/images/allens-hummingbird.jpg",
-      songPath: "/audio/songs/allens-hummingbird-song.mp3",
-      callPath: "/audio/calls/allens-hummingbird-call.mp3",
+    wrentit: {
+      name: "Wrentit",
+      imagePath: "/images/WREN_CROPPED.jpg",
+      songPath: "/audio/WREN_Song_Male_ELINGS-CTRL_20250325_072000.mp3",
+      callPath: "/audio/WREN_Song_Female_ELINGS_20241205_082000.mp3",
+      callText: "Female Song",
+      songText: "Male Song",
     },
     "california-towhee": {
       name: "California Towhee",
-      imagePath: "/images/california-towhee.jpg",
-      songPath: "/audio/songs/california-towhee-song.mp3",
-      callPath: "/audio/calls/california-towhee-call.mp3",
+      imagePath: "/images/CALT_CROPPED.jpg",
+      songPath: "/audio/CALT_Duet_ELINGS-CTRL_20250507_181000.mp3",
+      callPath: "/audio/CALT_Call_ELINGS-CTRL_20250507_181000(Shortened).mp3",
     },
   } as BirdConfig,
 };
