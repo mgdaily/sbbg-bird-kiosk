@@ -2,7 +2,6 @@
   import { onMount, onDestroy } from "svelte";
   import type { WaveSurferInstance } from "wavesurfer";
   import { getMimicPhase, setMimicPhase } from "$lib/stores/appStore.svelte";
-  import { invalidateAll } from "$app/navigation";
 
   let { audioPath }: { audioPath: string } = $props();
 
@@ -96,6 +95,7 @@
 
   async function startRecording() {
     errorMessage = null;
+    setMimicPhase("recording");
 
     try {
       // Check if mediaDevices is available
@@ -271,35 +271,6 @@
     }
   }
 
-  function reset() {
-    setMimicPhase("idle");
-    countdown = 0;
-    errorMessage = null;
-    if (countdownInterval) {
-      clearInterval(countdownInterval);
-      countdownInterval = null;
-    }
-    if (recordingTimeout) {
-      clearTimeout(recordingTimeout);
-      recordingTimeout = null;
-    }
-    if (originalWaveform) {
-      originalWaveform.stop();
-    }
-    if (recordingWaveform) {
-      recordingWaveform.destroy();
-      recordingWaveform = null;
-    }
-    if (mediaRecorder && mediaRecorder.state !== "inactive") {
-      mediaRecorder.stop();
-    }
-    if (stream) {
-      stream.getTracks().forEach((track) => track.stop());
-      stream = null;
-    }
-    audioChunks = [];
-  }
-
   function playRecording() {
     if (recordingWaveform) {
       recordingWaveform.play();
@@ -315,7 +286,9 @@
       <div id="original-canvas" class="w-full h-32 bg-black/20 rounded"></div>
       <button
         onclick={playOriginal}
-        disabled={phase === "recording" || phase === "countdown"}
+        disabled={phase === "recording" ||
+          phase === "countdown" ||
+          phase === "recorded"}
         class="px-6 py-2 bg-white/20 hover:bg-white/30 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         Play
@@ -348,16 +321,14 @@
     {/if}
 
     <!-- Recording Section -->
-    {#if phase === "countdown" || phase === "recording" || phase === "recorded"}
+    {#if phase === "recording" || phase === "recorded"}
       <div class="space-y-4">
         <h2 class="headline text-2xl">Your Mimic</h2>
         <div
           id="recording-canvas"
           class="w-full h-32 bg-black/20 rounded"
         ></div>
-        {#if phase === "countdown"}
-          <p class="text-light-gray text-center">Get ready...</p>
-        {:else if phase === "recording"}
+        {#if phase === "recording"}
           <div class="flex items-center justify-center gap-4">
             <div class="flex items-center gap-2">
               <div class="w-3 h-3 bg-red-600 rounded-full animate-pulse"></div>

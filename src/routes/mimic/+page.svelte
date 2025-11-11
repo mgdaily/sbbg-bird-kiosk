@@ -1,6 +1,5 @@
 <script lang="ts">
   import {
-    appState,
     getSelectedBirdMetadata,
     getSelectedAudioPath,
     getMimicPhase,
