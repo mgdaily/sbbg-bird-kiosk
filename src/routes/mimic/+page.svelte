@@ -3,6 +3,8 @@
     appState,
     getSelectedBirdMetadata,
     getSelectedAudioPath,
+    getMimicPhase,
+    setMimicPhase,
   } from "$lib/stores/appStore.svelte";
   import AudioPlayer from "$lib/components/audioPlayer.svelte";
   import { goto } from "$app/navigation";
@@ -15,6 +17,8 @@
   let showAudioPlayer = $state(false);
   let buttonsDisabled = $state(false);
   let audioType = $state<("call" | "song") | "">("");
+  // show the try again button once the user has recorded their audio
+  let showTryAgainButton = $derived(getMimicPhase() === "recorded");
 
   onMount(() => {
     if (!metadata) {
@@ -26,6 +30,13 @@
     audioType = type;
     showAudioPlayer = true; // Initialize player on button click
     buttonsDisabled = true;
+  }
+
+  function resetPageState() {
+    audioType = "";
+    showAudioPlayer = false;
+    buttonsDisabled = false;
+    setMimicPhase("idle");
   }
 </script>
 
@@ -54,7 +65,7 @@
     <!-- Audio Type Selection -->
     <div class="flex gap-4 mb-8">
       <button
-        disabled={buttonsDisabled}
+        disabled={buttonsDisabled || getMimicPhase() !== "idle"}
         onclick={() => handleAudioTypeSelect("call")}
         class="px-6 py-3 rounded transition-colors {audioType === 'call'
           ? 'bg-white/30 text-white border-2 border-white'
@@ -63,7 +74,7 @@
         {callText}
       </button>
       <button
-        disabled={buttonsDisabled}
+        disabled={buttonsDisabled || getMimicPhase() !== "idle"}
         onclick={() => handleAudioTypeSelect("song")}
         class="px-6 py-3 rounded transition-colors {audioType === 'song'
           ? 'bg-white/30 text-white border-2 border-white'
@@ -75,6 +86,15 @@
 
     {#if showAudioPlayer}
       <AudioPlayer audioPath={getSelectedAudioPath(audioType)} />
+    {/if}
+
+    {#if showTryAgainButton}
+      <button
+        onclick={() => resetPageState()}
+        class="px-6 py-2 bg-white/20 hover:bg-white/30 text-white rounded transition-colors"
+      >
+        Try Again
+      </button>
     {/if}
   </div>
 </div>

@@ -1,6 +1,8 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import type { WaveSurferInstance } from "wavesurfer";
+  import { getMimicPhase, setMimicPhase } from "$lib/stores/appStore.svelte";
+  import { invalidateAll } from "$app/navigation";
 
   let { audioPath }: { audioPath: string } = $props();
 
@@ -12,9 +14,9 @@
   let stream: MediaStream | null = null;
   let audioContext: AudioContext | null = null;
 
-  let phase = $state<
-    "idle" | "playing" | "countdown" | "recording" | "recorded"
-  >("idle");
+  // this is a derived state that is updated by the appStore`
+  let phase = $derived(getMimicPhase());
+
   let countdown = $state<number>(0);
   let countdownInterval: ReturnType<typeof setInterval> | null = null;
   let errorMessage = $state<string | null>(null);
@@ -45,7 +47,7 @@
 
     // Listen for playback finish
     originalWaveform.on("finish", () => {
-      phase = "countdown";
+      setMimicPhase("countdown");
       startCountdown();
     });
   });
@@ -168,7 +170,7 @@
       mediaRecorder.onstop = async () => {
         if (audioChunks.length === 0) {
           errorMessage = "No audio was recorded. Please try again.";
-          phase = "idle";
+          setMimicPhase("idle");
           if (stream) {
             stream.getTracks().forEach((track) => track.stop());
           }
@@ -194,7 +196,7 @@
           });
         }
 
-        phase = "recorded";
+        setMimicPhase("recorded");
 
         // Stop all tracks
         if (stream) {
@@ -204,7 +206,7 @@
       };
 
       mediaRecorder.start(100); // Collect data every 100ms
-      phase = "recording";
+      setMimicPhase("recording");
 
       // Auto-stop recording when it reaches the original duration
       if (originalDuration > 0) {
@@ -238,7 +240,7 @@
       }
 
       errorMessage = message;
-      phase = "idle";
+      setMimicPhase("idle");
 
       // Clean up if stream was partially created
       if (stream) {
@@ -254,7 +256,7 @@
 
   function playOriginal() {
     if (originalWaveform) {
-      phase = "playing";
+      setMimicPhase("playing");
       originalWaveform.play();
     }
   }
@@ -270,7 +272,7 @@
   }
 
   function reset() {
-    phase = "idle";
+    setMimicPhase("idle");
     countdown = 0;
     errorMessage = null;
     if (countdownInterval) {
@@ -375,12 +377,6 @@
               class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded transition-colors"
             >
               Play Your Recording
-            </button>
-            <button
-              onclick={reset}
-              class="px-6 py-2 bg-white/20 hover:bg-white/30 text-white rounded transition-colors"
-            >
-              Try Again
             </button>
           </div>
         {/if}

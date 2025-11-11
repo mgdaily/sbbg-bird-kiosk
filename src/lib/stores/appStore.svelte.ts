@@ -6,13 +6,25 @@ export interface AppState {
     // Key of the bird in the config
     key: string;
   };
+  mimicPhase: "idle" | "playing" | "countdown" | "recording" | "recorded";
 }
 
 export const appState: AppState = $state<AppState>({
   selectedBird: {
     key: "",
   },
+  mimicPhase: "idle",
 });
+
+export function getMimicPhase() {
+  return appState.mimicPhase;
+}
+
+export function setMimicPhase(
+  phase: "idle" | "playing" | "countdown" | "recording" | "recorded"
+) {
+  appState.mimicPhase = phase;
+}
 
 export function setSelectedBird(key: string) {
   appState.selectedBird.key = key;
