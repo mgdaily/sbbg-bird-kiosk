@@ -13,14 +13,13 @@
   <!-- Header -->
   <header class="pt-6 px-8">
     <div class="flex items-center gap-3 mb-2">
-      <div
-        class="w-8 h-8 bg-white rounded-full flex items-center justify-center"
-      >
-        <div class="w-4 h-4 bg-[var(--forest-green)] rounded-full"></div>
+      <div>
+        <img
+          src="/images/SBBG_LOGO.svg"
+          alt="Santa Barbara Botanic Garden"
+          class="sbbg-logo"
+        />
       </div>
-      <span class="text-white sans-serif text-lg"
-        >Santa Barbara Botanic Garden</span
-      >
     </div>
     <hr class="border-t border-white opacity-30" />
   </header>
@@ -68,3 +67,10 @@
     <hr class="border-t border-white opacity-30" />
   </footer>
 </div>
+
+<style>
+  .sbbg-logo {
+    scale: 0.8;
+    filter: brightness(0) invert(1);
+  }
+</style>

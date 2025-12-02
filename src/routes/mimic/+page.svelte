@@ -14,7 +14,6 @@
   const songText = $derived(metadata?.songText || "Song");
 
   let showAudioPlayer = $state(false);
-  let buttonsDisabled = $state(false);
   let audioType = $state<("call" | "song") | "">("");
   // show the try again button once the user has recorded their audio
   let showTryAgainButton = $derived(getMimicPhase() === "recorded");
@@ -28,13 +27,11 @@
   function handleAudioTypeSelect(type: "call" | "song") {
     audioType = type;
     showAudioPlayer = true; // Initialize player on button click
-    buttonsDisabled = true;
   }
 
   function resetPageState() {
     audioType = "";
     showAudioPlayer = false;
-    buttonsDisabled = false;
     setMimicPhase("idle");
   }
 </script>
@@ -64,7 +61,7 @@
     <!-- Audio Type Selection -->
     <div class="flex gap-4 mb-8">
       <button
-        disabled={buttonsDisabled || getMimicPhase() !== "idle"}
+        disabled={getMimicPhase() !== "idle"}
         onclick={() => handleAudioTypeSelect("call")}
         class="px-6 py-3 rounded transition-colors {audioType === 'call'
           ? 'bg-white/30 text-white border-2 border-white'
@@ -73,7 +70,7 @@
         {callText}
       </button>
       <button
-        disabled={buttonsDisabled || getMimicPhase() !== "idle"}
+        disabled={getMimicPhase() !== "idle"}
         onclick={() => handleAudioTypeSelect("song")}
         class="px-6 py-3 rounded transition-colors {audioType === 'song'
           ? 'bg-white/30 text-white border-2 border-white'
