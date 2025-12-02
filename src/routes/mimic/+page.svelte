@@ -42,9 +42,10 @@
     href="/"
     onclick={(e) => {
       e.preventDefault();
+      resetPageState();
       goto("/");
     }}
-    class="mb-8 text-white/80 hover:text-white transition-colors"
+    class="mb-8 text-white/80 hover:text-white transition-colors back-button"
   >
     ← Back to Birds
   </a>
@@ -94,3 +95,9 @@
     {/if}
   </div>
 </div>
+
+<style>
+  .back-button {
+    font-size: 1.5rem;
+  }
+</style>

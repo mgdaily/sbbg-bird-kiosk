@@ -70,7 +70,8 @@
 
 <style>
   .sbbg-logo {
-    scale: 0.8;
+    scale: 0.7;
     filter: brightness(0) invert(1);
+    margin-left: -20px;
   }
 </style>
