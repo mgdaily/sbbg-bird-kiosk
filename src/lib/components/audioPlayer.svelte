@@ -63,8 +63,13 @@
 
     // Listen for playback finish
     originalWaveform.on("finish", () => {
-      setMimicPhase("countdown");
-      startCountdown();
+      if (phase === "recorded") {
+        // allow the user to replay the original audio, even after recording.
+        return;
+      } else {
+        setMimicPhase("countdown");
+        startCountdown();
+      }
     });
   }
 
@@ -313,8 +318,13 @@
 
   function playOriginal() {
     if (originalWaveform) {
-      setMimicPhase("playing");
-      originalWaveform.play();
+      if (phase === "recorded") {
+        // allow the user to replay the original audio, even after recording.
+        originalWaveform.play();
+      } else {
+        setMimicPhase("playing");
+        originalWaveform.play();
+      }
     }
   }
 
@@ -351,9 +361,7 @@
       </div>
       <button
         onclick={playOriginal}
-        disabled={phase === "recording" ||
-          phase === "countdown" ||
-          phase === "recorded"}
+        disabled={phase === "recording" || phase === "countdown"}
         class="px-6 py-2 bg-white/20 hover:bg-white/30 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         Play
