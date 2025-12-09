@@ -25,8 +25,15 @@
   });
 
   function handleAudioTypeSelect(type: "call" | "song") {
-    audioType = type;
-    showAudioPlayer = true; // Initialize player on button click
+    if (getMimicPhase() === "recorded") {
+      // reset the page, but select the new audio type and show the audio player
+      resetPageState();
+      audioType = type;
+      showAudioPlayer = true;
+    } else {
+      audioType = type;
+      showAudioPlayer = true; // Initialize player on button click
+    }
   }
 
   function resetPageState() {
@@ -62,7 +69,7 @@
     <!-- Audio Type Selection -->
     <div class="flex gap-4 mb-8">
       <button
-        disabled={getMimicPhase() !== "idle"}
+        disabled={getMimicPhase() !== "idle" && getMimicPhase() !== "recorded"}
         onclick={() => handleAudioTypeSelect("call")}
         class="px-6 py-3 rounded transition-colors {audioType === 'call'
           ? 'bg-white/30 text-white border-2 border-white'
@@ -71,7 +78,7 @@
         {callText}
       </button>
       <button
-        disabled={getMimicPhase() !== "idle"}
+        disabled={getMimicPhase() !== "idle" && getMimicPhase() !== "recorded"}
         onclick={() => handleAudioTypeSelect("song")}
         class="px-6 py-3 rounded transition-colors {audioType === 'song'
           ? 'bg-white/30 text-white border-2 border-white'
